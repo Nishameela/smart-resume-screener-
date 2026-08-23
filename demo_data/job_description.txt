@@ -1,0 +1,21 @@
+Backend Engineer
+
+We are looking for a Backend Engineer to join our platform team.
+
+Requirements:
+- 3+ years of professional experience in backend software development
+- Strong proficiency in Python
+- Hands-on experience building REST APIs with FastAPI or Flask
+- Bachelor's degree in Computer Science or a related field
+- Experience with relational databases (PostgreSQL preferred)
+
+Nice to have:
+- Experience with AWS or another major cloud provider
+- Experience with Docker and containerized deployments
+- Familiarity with CI/CD pipelines
+
+Responsibilities:
+- Design and build scalable backend services and APIs
+- Collaborate with frontend and product teams to ship features
+- Write tests and participate in code review
+- Own the reliability and performance of services you build

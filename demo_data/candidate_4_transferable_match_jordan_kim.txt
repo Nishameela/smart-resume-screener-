@@ -1,0 +1,25 @@
+Jordan Kim
+jordan.kim@example.com
+
+EXPERIENCE
+
+Software Engineer, DataForge Labs (Feb 2021 - Present)
+Build and maintain backend services in Python using Django REST Framework
+for a data analytics product. Designed relational schemas in PostgreSQL for
+multi-tenant customer data. Built internal ETL pipelines in Python that
+process millions of records daily. Deployed services to Google Cloud
+Platform using Docker containers.
+
+Backend Developer, Nimbus Robotics (Jun 2019 - Jan 2021)
+Developed Python microservices communicating over REST and gRPC for
+robotics telemetry ingestion. Collaborated closely with the data science
+team to expose model predictions through internal APIs.
+
+EDUCATION
+
+B.S. in Computer Science, University of Michigan, 2019
+
+SKILLS
+
+Python, Django REST Framework, PostgreSQL, Google Cloud Platform, Docker,
+gRPC, Git, Machine Learning (collaborated with ML models in production)

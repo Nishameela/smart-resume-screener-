@@ -1,0 +1,21 @@
+Priya Sharma
+priya.sharma@example.com
+
+EXPERIENCE
+
+Software Engineer, Bright Learning (Aug 2024 - Present)
+Build and maintain backend services in Python using Django for an online
+learning platform. Implemented REST endpoints for course enrollment and
+grading. Work with a MySQL database for content storage.
+
+Junior Developer Intern, CivicWorks (Jan 2024 - Jun 2024)
+Assisted in building internal tools in Python. Wrote scripts for data
+cleanup and basic automation. Limited exposure to production deployment.
+
+EDUCATION
+
+B.S. in Information Technology, Portland State University, 2023
+
+SKILLS
+
+Python, Django, MySQL, HTML, CSS, Git

@@ -1,0 +1,29 @@
+# --- Python / backend ---
+backend/venv/
+backend/.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+backend/data/*.db
+backend/data/*.sqlite3
+.env
+*.env
+!.env.example
+
+# --- Node / frontend ---
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# --- Misc ---
+*.log
+.coverage
+htmlcov/

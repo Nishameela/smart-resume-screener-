@@ -1,0 +1,16 @@
+Jordan Lee
+jordan.lee@example.com
+
+EXPERIENCE
+Backend Engineer, Acme Corp (2021 - Present)
+Built REST APIs using Python and FastAPI, deployed on AWS. Designed
+PostgreSQL schemas for a multi-tenant billing system serving 50k users.
+
+Software Engineer Intern, Beta Labs (2020 - 2021)
+Worked on data pipelines in Python, wrote unit tests with pytest.
+
+EDUCATION
+B.S. Computer Science, State University, 2021
+
+SKILLS
+Python, FastAPI, PostgreSQL, Docker, Git, REST APIs
