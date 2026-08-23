@@ -100,6 +100,26 @@ def test_create_evaluation_end_to_end(client):
     assert "FastAPI" in strong_matches[0]["evidence"][0]
 
 
+def test_duplicate_evaluation_returns_200_not_201(client):
+    resume, jd = _setup_resume_and_jd(client)
+
+    from app.schemas.evaluation_llm import EvaluationLLMResult
+
+    with patch(
+        "app.services.llm_evaluator.call_structured",
+        return_value=EvaluationLLMResult.model_validate(_fake_grounded_evaluation_result()),
+    ) as mock_call:
+        first_resp = client.post("/api/evaluations", json={"resume_id": resume["id"], "jd_id": jd["id"]})
+        second_resp = client.post("/api/evaluations", json={"resume_id": resume["id"], "jd_id": jd["id"]})
+
+    assert first_resp.status_code == 201
+    # Re-requesting the same resume/JD pair is a lookup, not a creation (200),
+    # and must not re-invoke the LLM.
+    assert second_resp.status_code == 200
+    assert first_resp.json()["id"] == second_resp.json()["id"]
+    mock_call.assert_called_once()
+
+
 def test_list_evaluations_ranked_for_jd(client):
     resume, jd = _setup_resume_and_jd(client)
 

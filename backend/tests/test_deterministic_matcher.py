@@ -35,6 +35,27 @@ def test_skill_requirement_missing_skill():
     assert result.score == 0.0
 
 
+def test_compound_skill_requirement_scores_by_matched_fraction_not_full_match():
+    """A requirement referencing multiple skills (e.g. "Python and Django")
+    must not report a clean 100/matched when the candidate only has one of
+    them -- this evidence is fed directly into the LLM prompt and, on the
+    LLM-outage fallback path, IS the final score, so overstating it here
+    has no downstream check to catch it."""
+    skills = default_normalizer.normalize_many(["Python"])
+    result = match_skill_requirement("Python and Django experience required", skills)
+    assert result.matched is False  # Django is missing -- not a full match
+    assert result.score == 50.0  # 1 of 2 referenced skills present
+    assert "Python" in result.summary
+    assert "Django" in result.summary
+
+
+def test_compound_skill_requirement_full_match_when_all_present():
+    skills = default_normalizer.normalize_many(["Python", "Django"])
+    result = match_skill_requirement("Python and Django experience required", skills)
+    assert result.matched is True
+    assert result.score == 100.0
+
+
 def test_skill_requirement_short_skill_name_no_false_positive():
     """'Go' (a known canonical skill) must not spuriously match substrings
     inside unrelated words like 'Google' or 'good'."""

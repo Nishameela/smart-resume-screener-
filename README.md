@@ -446,8 +446,8 @@ concurrent requests target the same (resume, JD) pair; and full
 API-level integration tests for every endpoint.
 
 Two additional ad-hoc Playwright smoke tests live in `scripts/` (not a
-project dependency — run manually with `pip install playwright` if you want
-to reproduce them) that drive the real frontend build with a headless
+project dependency — run manually with `pip install playwright && playwright install chromium`
+if you want to reproduce them) that drive the real frontend build with a headless
 browser: one against the real backend confirming graceful failure handling,
 one with mocked network responses confirming the full Setup → Rankings →
 Detail flow renders correctly end to end.

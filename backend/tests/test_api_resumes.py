@@ -67,9 +67,13 @@ def test_upload_with_successful_structured_extraction(client):
 
 def test_duplicate_upload_returns_same_resume(client):
     with patch("app.services.resume_parser.parse_resume", return_value=_fake_extraction()):
-        first = _upload(client, "sample_resume.pdf", "application/pdf").json()
-        second = _upload(client, "sample_resume.pdf", "application/pdf").json()
+        first_resp = _upload(client, "sample_resume.pdf", "application/pdf")
+        second_resp = _upload(client, "sample_resume.pdf", "application/pdf")
+    first, second = first_resp.json(), second_resp.json()
     assert first["id"] == second["id"]
+    # First upload creates (201); the duplicate is a lookup, not a creation (200).
+    assert first_resp.status_code == 201
+    assert second_resp.status_code == 200
 
     listing = client.get("/api/resumes").json()
     assert len(listing) == 1

@@ -184,14 +184,40 @@ def _build_deterministic_fallback(
 
     for index, requirement in requirement_by_index.items():
         evidence_item = deterministic_by_index[index]
-        match_level = _deterministic_only_match_level(evidence_item.score)
         priority = requirement.priority.value if hasattr(requirement.priority, "value") else requirement.priority
 
+        if evidence_item.score is None:
+            # No deterministic signal exists for this requirement at all (e.g. a
+            # responsibility/soft-skill requirement -- see deterministic_matcher.py)
+            # -- this means "never checked," not "checked and absent." With no LLM
+            # available either, we genuinely have no evidence either way, so this
+            # requirement is left OUT of score_inputs entirely: it must not drag
+            # down the weighted-average score, and it must not count toward the
+            # missing-must-have penalty, both of which would misrepresent "unknown"
+            # as "confirmed missing." It still gets a requirement_matches row so
+            # the UI can show it, honestly labeled as unevaluated.
+            requirement_matches.append(
+                {
+                    "requirement_id": requirement.id,
+                    "match_level": MatchLevel.NOT_DEMONSTRATED,
+                    "evidence": [],
+                    "reasoning": (
+                        "AI evaluation was unavailable, and this requirement has no "
+                        "deterministic (rule-based) signal either -- it could not be "
+                        "evaluated at all and was excluded from the score, rather than "
+                        f"counted as unmet. {evidence_item.summary}"
+                    ),
+                    "confidence": 0.0,
+                }
+            )
+            continue
+
+        match_level = _deterministic_only_match_level(evidence_item.score)
         score_inputs.append(
             RequirementScoreInput(
                 priority=priority,
                 match_level=match_level.value,
-                confidence=0.3 if evidence_item.score is not None else 0.0,
+                confidence=0.3,
                 deterministic_score=evidence_item.score,
             )
         )
@@ -204,7 +230,7 @@ def _build_deterministic_fallback(
                     f"AI evaluation was unavailable for this evaluation; this is a "
                     f"deterministic-only estimate. {evidence_item.summary}"
                 ),
-                "confidence": 0.3 if evidence_item.score is not None else 0.0,
+                "confidence": 0.3,
             }
         )
 

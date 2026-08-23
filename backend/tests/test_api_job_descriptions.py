@@ -53,10 +53,14 @@ def test_duplicate_jd_does_not_call_llm_again(client):
     with patch(
         "app.api.job_descriptions.parse_job_description", return_value=_fake_extraction()
     ) as mock_parse:
-        first = client.post("/api/job-descriptions", json={"raw_text": SAMPLE_JD}).json()
-        second = client.post("/api/job-descriptions", json={"raw_text": SAMPLE_JD}).json()
+        first_resp = client.post("/api/job-descriptions", json={"raw_text": SAMPLE_JD})
+        second_resp = client.post("/api/job-descriptions", json={"raw_text": SAMPLE_JD})
 
+    first, second = first_resp.json(), second_resp.json()
     assert first["id"] == second["id"]
+    # First call creates (201); the duplicate is a lookup, not a creation (200).
+    assert first_resp.status_code == 201
+    assert second_resp.status_code == 200
     mock_parse.assert_called_once()
 
 

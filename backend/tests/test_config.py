@@ -8,9 +8,9 @@ the process-wide .env-loaded singleton) so each case is isolated.
 from app.core.config import Settings
 
 
-def test_anthropic_is_the_default_provider():
+def test_gemini_is_the_default_provider():
     s = Settings(_env_file=None)
-    assert s.llm_provider == "anthropic"
+    assert s.llm_provider == "gemini"
 
 
 def test_resolved_default_model_falls_back_per_provider_when_unset():

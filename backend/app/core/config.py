@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     # Which SDK/API call_structured() dispatches to. See app/core/llm_client.py
     # for the provider implementations; every other module stays unaware of
     # which provider is active and only ever calls call_structured().
-    llm_provider: Literal["anthropic", "gemini"] = "anthropic"
+    llm_provider: Literal["anthropic", "gemini"] = "gemini"
 
     # --- LLM: provider credentials ---
     anthropic_api_key: str = ""

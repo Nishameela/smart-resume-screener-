@@ -29,7 +29,9 @@ class JDRequirement(Base):
     __tablename__ = "jd_requirements"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    jd_id: Mapped[int] = mapped_column(ForeignKey("job_descriptions.id", ondelete="CASCADE"))
+    jd_id: Mapped[int] = mapped_column(
+        ForeignKey("job_descriptions.id", ondelete="CASCADE"), index=True
+    )
 
     requirement_text: Mapped[str] = mapped_column(Text)
     priority: Mapped[RequirementPriority] = mapped_column(

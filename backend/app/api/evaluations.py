@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -11,7 +11,13 @@ router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 
 
 @router.post("", response_model=EvaluationOut, status_code=201)
-def create_evaluation(payload: EvaluationCreate, db: Session = Depends(get_db)) -> EvaluationOut:
+def create_evaluation(payload: EvaluationCreate, response: Response, db: Session = Depends(get_db)) -> EvaluationOut:
+    # Pre-check so an already-evaluated pair returns 200 (lookup) rather
+    # than 201 (creation) -- mirrors the resumes/job-descriptions endpoints.
+    existing = evaluation_repository.get_by_resume_and_jd(db, payload.resume_id, payload.jd_id)
+    if existing is not None:
+        response.status_code = 200
+
     evaluation = get_or_create_evaluation(db, payload.resume_id, payload.jd_id)
     # Re-fetch with eager-loaded requirement_matches -> requirement relationships
     # so the response doesn't trigger N+1 lazy loads.

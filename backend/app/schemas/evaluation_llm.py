@@ -2,7 +2,7 @@
 evaluation + overall candidate summary), returned in a single call."""
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class RequirementMatchLLM(BaseModel):
@@ -29,6 +29,23 @@ class RequirementMatchLLM(BaseModel):
         description="1-2 concise sentences explaining the judgment, in plain language a recruiter would read."
     )
     confidence: float = Field(ge=0.0, le=1.0, description="How confident you are in this judgment, 0.0-1.0.")
+
+    @model_validator(mode="after")
+    def _enforce_evidence_shape(self) -> "RequirementMatchLLM":
+        """The prompt asks for "0-3 quotes, empty if not_demonstrated," but
+        that's advisory text the model can drift from -- until now nothing
+        in code actually enforced it, which is exactly the kind of gap a
+        project built around "never fabricate evidence" shouldn't have.
+        Auto-correct rather than raise: a model that includes a quote
+        alongside not_demonstrated (or returns >3 quotes) is very unlikely
+        to be fabricating maliciously, just slightly off-instruction, so
+        silently normalizing here is safer than spending a corrective-retry
+        API call on it."""
+        if self.match_level == "not_demonstrated":
+            self.evidence = []
+        elif len(self.evidence) > 3:
+            self.evidence = self.evidence[:3]
+        return self
 
 
 class EvaluationSummaryLLM(BaseModel):

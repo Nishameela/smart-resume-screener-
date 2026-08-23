@@ -63,7 +63,9 @@ def _extract_plain_text(content: bytes) -> str:
     try:
         return content.decode("utf-8")
     except UnicodeDecodeError:
-        try:
-            return content.decode("latin-1")
-        except UnicodeDecodeError as exc:
-            raise ExtractionError("The text file is not readable as UTF-8 or Latin-1 text.") from exc
+        # latin-1 maps every byte 0-255 to a character, so this decode can
+        # never itself raise UnicodeDecodeError -- it's a deliberate
+        # last-resort fallback for non-UTF-8 text files, not a validation
+        # step. (A wrapping try/except here would be genuinely unreachable
+        # dead code.)
+        return content.decode("latin-1")

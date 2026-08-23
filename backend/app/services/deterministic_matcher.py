@@ -77,17 +77,29 @@ def match_skill_requirement(
 
     if referenced_skills:
         matched = [name for name in referenced_skills if name in resume_by_canonical]
+        missing = [name for name in referenced_skills if name not in resume_by_canonical]
         if matched:
             details = "; ".join(
                 f"{name} ({resume_by_canonical[name].match_type.value} match: "
                 f"candidate listed '{resume_by_canonical[name].raw_text}')"
                 for name in matched
             )
+            summary = f"Deterministic skill check found: {details}."
+            if missing:
+                # Compound requirement (e.g. "Python and Django") -- report
+                # the partial hit honestly rather than a full match. Scoring
+                # by matched-fraction, not a flat 100, is what stops a
+                # requirement referencing several skills from reporting a
+                # clean match when the candidate only has one of them --
+                # this evidence is fed directly into the LLM prompt and,
+                # on the LLM-outage fallback path, IS the final score, so
+                # overstating it here has no downstream check to catch it.
+                summary += f" No matching skill found for: {', '.join(missing)}."
             return DeterministicEvidence(
                 category="skill",
-                matched=True,
-                score=100.0,
-                summary=f"Deterministic skill check found: {details}.",
+                matched=not missing,
+                score=100.0 * len(matched) / len(referenced_skills),
+                summary=summary,
             )
         return DeterministicEvidence(
             category="skill",

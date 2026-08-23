@@ -142,6 +142,53 @@ def test_llm_failure_falls_back_to_deterministic_only_scoring():
     assert python_match.match_level.value == "strong"
 
 
+def test_llm_failure_fallback_excludes_no_signal_requirements_from_score_and_penalty():
+    """A responsibility/soft-skill requirement has no deterministic signal
+    at all (deterministic_evidence.score=None) -- that means "never
+    checked," not "checked and found absent." On the LLM-outage fallback
+    path (no LLM available to judge it either), it must be excluded from
+    both the weighted-average score and the missing-must-have penalty
+    count, not silently treated as not_demonstrated. Regression test for
+    that conflation bug."""
+    from app.models.enums import RequirementCategory, RequirementPriority
+    from app.models.job_description import JDRequirement
+    from app.services.evaluation_service import get_or_create_evaluation
+
+    db = _make_session()
+    resume, jd = _seed_resume_and_jd(db)
+    jd.requirements.append(
+        JDRequirement(
+            requirement_text="Leads cross-functional projects",
+            priority=RequirementPriority.MUST_HAVE,
+            category=RequirementCategory.RESPONSIBILITY,
+        )
+    )
+    db.commit()
+    db.refresh(jd)
+
+    with patch.object(llm_evaluator, "run_grounded_evaluation", side_effect=LLMError("provider outage")):
+        evaluation = get_or_create_evaluation(db, resume.id, jd.id)
+
+    assert evaluation.llm_status == LLMStatus.FALLBACK
+    assert len(evaluation.requirement_matches) == 3
+
+    responsibility_match = next(
+        m for m in evaluation.requirement_matches if m.requirement.requirement_text == "Leads cross-functional projects"
+    )
+    # Still shown in the breakdown, honestly labeled as unevaluated rather
+    # than a confirmed miss.
+    assert responsibility_match.match_level.value == "not_demonstrated"
+    assert "could not be evaluated" in responsibility_match.reasoning
+
+    # Only the two skill requirements (Python: must_have/matched, AWS:
+    # preferred/unmatched) drive the score -- the unscoreable must_have
+    # responsibility requirement neither drags down the weighted average
+    # nor triggers the missing-must-have penalty.
+    assert evaluation.deterministic_component == round((100.0 * 2 + 0.0 * 1) / 3, 1)
+    assert evaluation.llm_component == round((100.0 * 2 + 0.0 * 1) / 3, 1)
+    assert evaluation.overall_score == evaluation.llm_component  # no penalty applied
+
+
 def test_nonexistent_resume_raises_not_found():
     from app.services.evaluation_service import get_or_create_evaluation
 

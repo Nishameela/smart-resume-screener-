@@ -21,10 +21,15 @@ def _isolate_llm_settings(monkeypatch):
     to LLM config: tests must behave identically no matter what
     LLM_PROVIDER / API keys / model happen to be set in the developer's
     real backend/.env (which, for real usage, is deliberately pointed at
-    Gemini -- see app/core/llm_client.py). Pin known defaults here so the
-    suite is hermetic; individual tests that care about a specific
-    provider (e.g. the Gemini-path tests in test_llm_client.py) still
-    monkeypatch further on top of this baseline."""
+    Gemini -- see app/core/llm_client.py), and independently of
+    Settings.llm_provider's own default (also "gemini", see config.py).
+    Pinning this fixture to "anthropic" is a deliberate, fixed test
+    baseline -- most pre-existing tests were written expecting
+    Anthropic-flavored behavior (e.g. "ANTHROPIC_API_KEY" in error
+    messages) -- not an attempt to mirror either the real or default
+    provider. Individual tests that care about a specific provider (e.g.
+    the Gemini-path tests in test_llm_client.py) monkeypatch further on
+    top of this baseline."""
     from app.core.config import settings
 
     monkeypatch.setattr(settings, "llm_provider", "anthropic")

@@ -55,7 +55,7 @@ class ExperienceEntry(Base):
     __tablename__ = "experience_entries"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"))
+    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"), index=True)
 
     title: Mapped[str | None] = mapped_column(String(255), nullable=True)
     company: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -71,7 +71,7 @@ class EducationEntry(Base):
     __tablename__ = "education_entries"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"))
+    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"), index=True)
 
     degree: Mapped[str | None] = mapped_column(String(255), nullable=True)
     institution: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -85,7 +85,7 @@ class ResumeSkill(Base):
     __tablename__ = "resume_skills"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"))
+    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"), index=True)
 
     raw_text: Mapped[str] = mapped_column(String(255))
     canonical_name: Mapped[str] = mapped_column(String(255))

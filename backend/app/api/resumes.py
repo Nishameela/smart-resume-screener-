@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, Response, UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/resumes", tags=["resumes"])
 
 
 @router.post("", response_model=ResumeOut, status_code=201)
-async def upload_resume(file: UploadFile, db: Session = Depends(get_db)) -> ResumeOut:
+async def upload_resume(file: UploadFile, response: Response, db: Session = Depends(get_db)) -> ResumeOut:
     content = await file.read()
     validated = validate_upload(file.filename, content)
     text = extract_text(validated)
@@ -22,6 +22,8 @@ async def upload_resume(file: UploadFile, db: Session = Depends(get_db)) -> Resu
 
     existing = resume_repository.get_by_content_hash(db, content_hash)
     if existing is not None:
+        # Same content already ingested -- this is a lookup, not a creation.
+        response.status_code = 200
         return ResumeOut.model_validate(existing)
 
     resume, created = resume_repository.create_resume_or_get_existing(
@@ -35,6 +37,7 @@ async def upload_resume(file: UploadFile, db: Session = Depends(get_db)) -> Resu
         # Lost a race to a concurrent upload of the same content -- the
         # winner's row already has (or is getting) structured extraction;
         # don't run it a second time.
+        response.status_code = 200
         return ResumeOut.model_validate(resume)
     # Text extraction succeeded. Structured (LLM) extraction runs next and
     # never raises -- a failure here still leaves the resume record usable

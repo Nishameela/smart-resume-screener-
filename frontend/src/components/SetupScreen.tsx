@@ -53,6 +53,11 @@ export function SetupScreen({ onAnalysisComplete }: { onAnalysisComplete: (jdId:
       // Sequential, not parallel: keeps per-file status updates legible in
       // the UI and avoids bursting the LLM provider with concurrent calls
       // for what is, in the demo, a handful of resumes.
+      //
+      // Track success locally rather than reading back from `entries` --
+      // that variable is the state captured when runAnalysis started, so
+      // updateEntry's setState calls during the loop never mutate it.
+      let anySucceeded = entries.some((entry) => entry.status === "done");
       for (const entry of entries) {
         if (entry.status === "done") continue;
         updateEntry(entry.id, { status: "uploading", error: undefined });
@@ -68,10 +73,18 @@ export function SetupScreen({ onAnalysisComplete }: { onAnalysisComplete: (jdId:
           updateEntry(entry.id, { status: "evaluating", candidateName: resume.candidate_name ?? undefined });
           await createEvaluation(resume.id, jd.id);
           updateEntry(entry.id, { status: "done" });
+          anySucceeded = true;
         } catch (err) {
           const message = err instanceof ApiError ? err.message : "Unexpected error processing this file.";
           updateEntry(entry.id, { status: "error", error: message });
         }
+      }
+
+      if (!anySucceeded) {
+        // Every resume failed -- stay on this screen with a clear error
+        // rather than navigating to a Rankings view with nothing to show.
+        setRunError("None of the resumes could be processed. Check the errors above and try again.");
+        return;
       }
 
       onAnalysisComplete(jd.id);

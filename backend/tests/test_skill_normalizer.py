@@ -132,3 +132,23 @@ def test_canonical_names_covered_includes_known_skills():
     assert "React" in covered
     assert "Python" in covered
     assert "Machine Learning" in covered
+
+
+def test_no_alias_collides_with_a_canonical_key():
+    """An alias string that is also a separate canonical key is a real
+    taxonomy bug: whichever branch SkillNormalizer checks first "wins,"
+    silently stranding the other spelling in the wrong bucket (this is
+    exactly how "CSS3" ended up both an alias of "CSS" and its own
+    canonical entry with no aliases -- a resume skill spelled "CSS3"
+    never normalized into "CSS", producing a false non-match against a
+    "CSS" requirement). Guards against that class of bug recurring."""
+    from app.services.skill_taxonomy import SKILL_ALIASES
+
+    canonical_lower = {name.lower() for name in SKILL_ALIASES}
+    collisions = [
+        (canonical, alias)
+        for canonical, aliases in SKILL_ALIASES.items()
+        for alias in aliases
+        if alias.lower() in canonical_lower
+    ]
+    assert collisions == [], f"alias(es) collide with a canonical key: {collisions}"

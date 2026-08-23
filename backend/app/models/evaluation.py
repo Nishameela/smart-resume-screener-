@@ -24,8 +24,12 @@ class Evaluation(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    resume_id: Mapped[int] = mapped_column(ForeignKey("resumes.id", ondelete="CASCADE"))
-    jd_id: Mapped[int] = mapped_column(ForeignKey("job_descriptions.id", ondelete="CASCADE"))
+    resume_id: Mapped[int] = mapped_column(
+        ForeignKey("resumes.id", ondelete="CASCADE"), index=True
+    )
+    jd_id: Mapped[int] = mapped_column(
+        ForeignKey("job_descriptions.id", ondelete="CASCADE"), index=True
+    )
 
     overall_score: Mapped[float] = mapped_column(Float)
     # Nullable, not defaulted to 0.0: None means "no requirement in this
@@ -49,7 +53,14 @@ class Evaluation(Base):
         back_populates="evaluations"
     )
     requirement_matches: Mapped[list["RequirementMatch"]] = relationship(
-        back_populates="evaluation", cascade="all, delete-orphan"
+        back_populates="evaluation",
+        cascade="all, delete-orphan",
+        # Rows are inserted in JD-requirement order (see evaluation_repository's
+        # create path); without an explicit order_by, selectinload's read-back
+        # order is not guaranteed, which would make the requirement-by-requirement
+        # breakdown -- the app's signature explainability feature -- jump around
+        # on every page load. Insertion order == id order here.
+        order_by="RequirementMatch.id",
     )
 
 
@@ -61,7 +72,7 @@ class RequirementMatch(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     evaluation_id: Mapped[int] = mapped_column(
-        ForeignKey("evaluations.id", ondelete="CASCADE")
+        ForeignKey("evaluations.id", ondelete="CASCADE"), index=True
     )
     requirement_id: Mapped[int] = mapped_column(
         ForeignKey("jd_requirements.id", ondelete="CASCADE")
