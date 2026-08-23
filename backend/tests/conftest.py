@@ -67,6 +67,12 @@ def client():
         yield c
 
     app.dependency_overrides.clear()
+    # Release the engine's pooled connections before deleting the file --
+    # on Windows, os.unlink() fails with "used by another process" (WinError
+    # 32) if any connection in the pool still holds the file open; POSIX
+    # silently allows unlinking an open file, which is why this only shows
+    # up on Windows.
+    test_engine.dispose()
     os.unlink(db_path)
 
 
