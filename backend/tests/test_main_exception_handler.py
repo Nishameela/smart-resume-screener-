@@ -49,6 +49,10 @@ def lenient_client():
         yield c
 
     app.dependency_overrides.clear()
+    # See the identical fix/comment on the `client` fixture in conftest.py --
+    # Windows refuses to unlink a file the engine's connection pool still
+    # holds open (WinError 32); dispose() releases those handles first.
+    test_engine.dispose()
     os.unlink(db_path)
 
 
