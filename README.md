@@ -6,6 +6,12 @@ rule-based layer *and* a grounded LLM evaluation layer, and shows its work —
 every requirement gets a match level, a verbatim evidence quote, and a
 one-sentence reason, not just a number.
 
+## Demo
+
+<video src="https://raw.githubusercontent.com/Nishameela/smart-resume-screener-/main/docs/demo.mp4" controls width="100%"></video>
+
+*(Video not loading? [Watch/download it directly](docs/demo.mp4).)*
+
 ## 1. Project Overview
 
 Given a job description and a set of candidate resumes (PDF or plain text),
