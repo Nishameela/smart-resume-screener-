@@ -8,9 +8,16 @@ one-sentence reason, not just a number.
 
 ## Demo
 
-<video src="https://raw.githubusercontent.com/Nishameela/smart-resume-screener-/main/docs/demo.mp4" controls width="100%"></video>
 
-*(Video not loading? [Watch/download it directly](docs/demo.mp4).)*
+
+https://github.com/user-attachments/assets/f3f41650-3b0e-45d6-91f8-175665bbb345
+
+
+
+
+
+
+
 
 ## 1. Project Overview
 
